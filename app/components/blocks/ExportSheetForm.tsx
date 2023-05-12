@@ -10,14 +10,44 @@ import { connectedSheetNameAtom, signedUsersAtom } from "~/recoils";
 const ExportSheetForm = () => {
   const [signedUsers, setSignedUsers] = useRecoilState(signedUsersAtom);
   const connectedSheetName = useRecoilValue(connectedSheetNameAtom);
+
+  const [exportedTime, setExportedTime] = React.useState<Date | null>(null);
+  const [selectedOption, setSelectedOption] = React.useState<string | null>(
+    null
+  );
+
+  const getTimeDiff = () => {
+    if (exportedTime) {
+      const now = new Date();
+      const timeDiff = now.getTime() - exportedTime.getTime();
+      return `Last Export ${Math.floor(timeDiff / (1000 * 60 * 60))}h ago`;
+    }
+    return "";
+  };
+
+  React.useEffect(() => {
+    const lastExportedDate = localStorage.getItem("lastExported");
+    if (!exportedTime && lastExportedDate) {
+      setExportedTime(new Date(lastExportedDate));
+    } else if (exportedTime) {
+      localStorage.setItem("lastExported", exportedTime?.toString());
+    }
+  }, [exportedTime]);
+
   const onAddUserClick = () => {
     const username = window.prompt("input user name");
     setSignedUsers([...signedUsers, username || "account name"]);
   };
+
+  const onExportClick = () => {
+    setExportedTime(new Date());
+  };
+
   return (
     <div>
       <Text className="flex-1 my-3">Google Account</Text>
       <Dropdown
+        setOption={setSelectedOption}
         listOfOptions={signedUsers}
         placeholder="Account Name"
         textClassName="text-sm font-medium"
@@ -43,11 +73,17 @@ const ExportSheetForm = () => {
         iconSource="https://www.gstatic.com/images/branding/product/1x/sheets_2020q4_48dp.png"
       />
       <Button
-        // disabled={}
+        disabled={!connectedSheetName || !selectedOption}
+        onClick={onExportClick}
         className="py-2 text-sm font-medium w-full rounded-md mt-3 disabled:opacity-50"
       >
         Export
       </Button>
+      {exportedTime && (
+        <Text className="text-center w-full text-xs font-medium text-[#838383] mt-3">
+          {getTimeDiff()}
+        </Text>
+      )}
     </div>
   );
 };

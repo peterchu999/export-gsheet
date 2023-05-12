@@ -6,6 +6,7 @@ import TextField from "./TextField";
 
 export type DropdownType = {
   listOfOptions: string[];
+  setOption?: (option: string) => void;
   className?: string;
   optionContainerClassName?: string;
   defaultOption?: string;
@@ -24,6 +25,7 @@ const Dropdown = ({
   postListComponent,
   defaultOption,
   withSearch,
+  setOption,
 }: DropdownType) => {
   const [isListHidden, setIsListHidden] = React.useState<boolean>(true);
   const [searchQuery, setSearchQuery] = React.useState<string>("");
@@ -36,6 +38,7 @@ const Dropdown = ({
 
   const onOptionClick = (option: string) => () => {
     setselectedOption(option);
+    setOption?.(option);
     setIsListHidden(true);
   };
 
